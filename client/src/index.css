@@ -90,4 +90,95 @@
     background: rgba(168, 85, 247, 0.5);
     border-radius: 4px;
   }
+  
+  /* Advanced hover effects */
+  .hover-lift {
+    @apply transition-transform duration-300 hover:-translate-y-1;
+  }
+  
+  .hover-scale {
+    @apply transition-transform duration-300 hover:scale-105;
+  }
+  
+  /* Card with hover effect */
+  .feature-card {
+    @apply rounded-xl p-6 transition-all duration-300 bg-background/50 backdrop-blur-lg border border-white/5;
+    @apply hover:border-purple-500/30 hover:shadow-[0_5px_30px_rgba(139,92,246,0.15)];
+  }
+  
+  /* Button effects */
+  .button-glow {
+    @apply relative overflow-hidden rounded-lg;
+  }
+  
+  .button-glow::after {
+    @apply content-[''] absolute inset-0 rounded-lg;
+    @apply bg-gradient-to-r from-purple-500/20 to-blue-500/20 opacity-0;
+    @apply transition-opacity duration-300;
+  }
+  
+  .button-glow:hover::after {
+    @apply opacity-100;
+  }
+}
+
+/* Custom animations */
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
+
+@keyframes gradient-shift {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slow-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@layer utilities {
+  .animate-float {
+    animation: float 3s ease-in-out infinite;
+  }
+  
+  .animate-gradient {
+    background-size: 200% 200%;
+    animation: gradient-shift 4s ease infinite;
+  }
+  
+  .animate-fade-in {
+    animation: fadeIn 0.5s ease-out forwards;
+  }
+  
+  .animate-slow-spin {
+    animation: slow-spin 8s linear infinite;
+  }
 }

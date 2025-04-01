@@ -21,17 +21,28 @@ export default function Sidebar() {
     const isActive = location === href;
     
     return (
-      <Link href={href}>
-        <a className={cn(
-          "flex items-center space-x-3 px-4 py-3 rounded-lg transition-all",
-          isActive 
-            ? "bg-gradient-to-r from-purple-500/20 to-blue-500/20 border-l-3 border-purple-500 text-white" 
-            : "text-gray-400 hover:text-white hover:bg-white/5"
-        )}>
-          <i className={icon}></i>
+      <div className="relative">
+        {isActive && (
+          <div className="absolute left-0 top-0 h-full w-1 bg-gradient-to-b from-purple-500 to-blue-500 rounded-r animate-pulse" />
+        )}
+        <div 
+          onClick={() => window.location.href = href}
+          className={cn(
+            "flex items-center space-x-3 px-4 py-3 rounded-lg transition-all duration-300 cursor-pointer",
+            "transform hover:translate-x-1",
+            isActive 
+              ? "bg-gradient-to-r from-purple-500/20 to-blue-500/20 text-white font-medium" 
+              : "text-gray-400 hover:text-white hover:bg-white/5"
+          )}
+        >
+          <i className={cn(icon, "transition-transform duration-300", isActive ? "scale-110" : "")}></i>
           <span>{children}</span>
-        </a>
-      </Link>
+          
+          {isActive && (
+            <div className="absolute right-2 w-1.5 h-1.5 rounded-full bg-purple-500 animate-pulse" />
+          )}
+        </div>
+      </div>
     );
   };
 
