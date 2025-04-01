@@ -80,6 +80,12 @@ function Router() {
 }
 
 function App() {
+  const { loading } = useAuth();
+  
+  if (loading) {
+    return <LoadingScreen message="Starting up the application" />;
+  }
+  
   return (
     <QueryClientProvider client={queryClient}>
       <Router />

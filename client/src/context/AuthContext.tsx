@@ -26,13 +26,24 @@ export const AuthContext = createContext<AuthContextType>({
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true); // Start with loading true
   const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
 
   // Check if user is already logged in (simplified for demo)
   useEffect(() => {
-    // For demo purposes, there's no existing auth state
+    // For demo purposes, create a mock default user
+    const defaultUser: User = {
+      id: 1,
+      username: "demouser",
+      password: "",
+      email: "demo@example.com",
+      displayName: "Demo User",
+      avatar: null,
+      createdAt: new Date(),
+    };
+    
+    setUser(defaultUser);
     setLoading(false);
   }, []);
 

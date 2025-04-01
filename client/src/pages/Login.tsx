@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -30,8 +30,15 @@ const registerSchema = z.object({
 
 export default function Login() {
   const [activeTab, setActiveTab] = useState<string>("login");
-  const { login, register, loginWithGoogle, loading } = useAuth();
+  const { login, register, loginWithGoogle, loading, user } = useAuth();
   const [_, navigate] = useLocation();
+  
+  // If user is already authenticated, redirect to dashboard
+  useEffect(() => {
+    if (user) {
+      navigate("/");
+    }
+  }, [user, navigate]);
 
   const loginForm = useForm<z.infer<typeof loginSchema>>({
     resolver: zodResolver(loginSchema),
