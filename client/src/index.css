@@ -1,0 +1,93 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 220 14% 10%;
+    --foreground: 210 20% 98%;
+    
+    --card: 222 18% 12%;
+    --card-foreground: 210 20% 98%;
+    
+    --popover: 222 18% 12%;
+    --popover-foreground: 210 20% 98%;
+    
+    --primary: 270 95% 75%;
+    --primary-foreground: 210 20% 98%;
+    
+    --secondary: 222 14% 18%;
+    --secondary-foreground: 210 20% 98%;
+    
+    --muted: 222 14% 18%;
+    --muted-foreground: 215 16% 65%;
+    
+    --accent: 222 14% 18%;
+    --accent-foreground: 210 20% 98%;
+    
+    --destructive: 0 70% 50%;
+    --destructive-foreground: 210 20% 98%;
+    
+    --border: 222 14% 20%;
+    --input: 222 14% 20%;
+    --ring: 270 95% 75%;
+    
+    --chart-1: 270 95% 75%;
+    --chart-2: 217 91% 60%;
+    --chart-3: 186 95% 42%;
+    --chart-4: 332 80% 66%;
+    --chart-5: 120 100% 31%;
+    
+    --sidebar-background: 222 16% 10%;
+    --sidebar-foreground: 210 20% 98%;
+    --sidebar-primary: 270 95% 75%;
+    --sidebar-primary-foreground: 210 20% 98%;
+    --sidebar-accent: 222 14% 16%;
+    --sidebar-accent-foreground: 210 20% 98%;
+    --sidebar-border: 222 14% 16%;
+    --sidebar-ring: 270 95% 75%;
+    
+    --radius: 0.75rem;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply font-sans antialiased bg-background text-foreground;
+  }
+}
+
+@layer components {
+  .glass {
+    @apply bg-background/50 backdrop-blur-lg border border-white/5;
+  }
+  
+  .gradient-text {
+    @apply bg-gradient-to-r from-purple-500 to-blue-500 bg-clip-text text-transparent;
+  }
+  
+  .active-tab {
+    @apply bg-gradient-to-r from-purple-500/20 to-blue-500/20 border-l-[3px] border-purple-500;
+  }
+  
+  .glow-effect {
+    @apply transition-all duration-300 hover:shadow-[0_0_15px_rgba(168,85,247,0.7)];
+  }
+  
+  .scrollbar-thin::-webkit-scrollbar {
+    width: 4px;
+  }
+  
+  .scrollbar-thin::-webkit-scrollbar-track {
+    background: rgba(30, 34, 45, 0.3);
+  }
+  
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    background: rgba(168, 85, 247, 0.5);
+    border-radius: 4px;
+  }
+}
