@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { Link } from "wouter";
 import { useAuth } from "@/hooks/useAuth";
@@ -15,23 +15,25 @@ export default function Dashboard() {
   const { user } = useAuth();
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   
+  // Use staleTime to cache API results and prevent unnecessary requests
   const { data: stylePresets = [], isLoading: isLoadingPresets } = useQuery({
     queryKey: ["/api/style-presets"],
-    staleTime: 60000,
+    staleTime: 60000, // Cache for 1 minute
   });
   
   const { data: recentImages = [], isLoading: isLoadingImages } = useQuery({
     queryKey: ["/api/images", user?.id, 4, 0],
     queryFn: () => getUserImages(user?.id, 4, 0),
-    staleTime: 30000,
+    staleTime: 30000, // Cache for 30 seconds
     enabled: !!user,
   });
   
   const { data: aiModels = [], isLoading: isLoadingModels } = useQuery({
     queryKey: ["/api/ai-models"],
-    staleTime: 60000,
+    staleTime: 60000, // Cache for 1 minute
   });
   
+  // Use a regular array since we had issues with the useMemo implementation
   const quickActions = [
     {
       title: "Text to Image",
@@ -126,11 +128,9 @@ export default function Dashboard() {
       >
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-xl font-semibold">Featured Style Presets</h2>
-          <Link href="/presets">
-            <a className="text-sm text-purple-500 hover:underline flex items-center">
-              <span>View All</span>
-              <i className="ri-arrow-right-line ml-1"></i>
-            </a>
+          <Link href="/presets" className="text-sm text-purple-500 hover:underline flex items-center">
+            <span>View All</span>
+            <i className="ri-arrow-right-line ml-1"></i>
           </Link>
         </div>
         
@@ -164,13 +164,10 @@ export default function Dashboard() {
         >
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-xl font-semibold">Your Recent Creations</h2>
-            <div 
-              onClick={() => window.location.href = "/gallery"} 
-              className="text-sm text-purple-500 hover:underline flex items-center cursor-pointer"
-            >
+            <Link href="/gallery" className="text-sm text-purple-500 hover:underline flex items-center">
               <span>View All</span>
               <i className="ri-arrow-right-line ml-1"></i>
-            </div>
+            </Link>
           </div>
           
           {isLoadingImages ? (
@@ -217,13 +214,10 @@ export default function Dashboard() {
       >
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-xl font-semibold">Available AI Models</h2>
-          <div 
-            onClick={() => window.location.href = "/models"} 
-            className="text-sm text-purple-500 hover:underline flex items-center cursor-pointer"
-          >
+          <Link href="/models" className="text-sm text-purple-500 hover:underline flex items-center">
             <span>Compare Models</span>
             <i className="ri-arrow-right-line ml-1"></i>
-          </div>
+          </Link>
         </div>
         
         {isLoadingModels ? (

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useMemo, useCallback } from "react";
 import TextToImageForm from "@/components/ui/image-generation/TextToImageForm";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -13,15 +13,17 @@ export default function TextToImage() {
   const [generatedImageUrl, setGeneratedImageUrl] = useState<string | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
   
+  // Use staleTime to cache API results and prevent unnecessary requests
   const { data: stylePresets, isLoading: isLoadingPresets } = useQuery({
     queryKey: ["/api/style-presets"],
-    staleTime: 60000,
+    staleTime: 60000, // Cache for 1 minute
   });
 
-  const handleGenerate = (imageUrl: string) => {
+  // Use useCallback to prevent recreating this function on every render
+  const handleGenerate = useCallback((imageUrl: string) => {
     setGeneratedImageUrl(imageUrl);
     setIsGenerating(false);
-  };
+  }, []);
 
   return (
     <div className="max-w-6xl mx-auto">

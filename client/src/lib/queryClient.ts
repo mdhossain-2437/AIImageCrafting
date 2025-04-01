@@ -47,11 +47,23 @@ export const queryClient = new QueryClient({
       queryFn: getQueryFn({ on401: "throw" }),
       refetchInterval: false,
       refetchOnWindowFocus: false,
-      staleTime: Infinity,
-      retry: false,
+      
+      // Use a more balanced approach for caching:
+      // Data is considered fresh for 5 minutes (300000ms)
+      // After that, it becomes stale but will still be used from cache
+      // while a background refetch occurs
+      staleTime: 300000, 
+      
+      // Keep cached data for 1 hour (3600000ms) even when unused
+      // This helps when navigating back to previously visited pages
+      gcTime: 3600000,
+      
+      // Allow retries for network failures but limit to 2 attempts
+      retry: 2,
+      retryDelay: attemptIndex => Math.min(1000 * 2 ** attemptIndex, 30000),
     },
     mutations: {
-      retry: false,
+      retry: 1, // Allow one retry for mutations to handle network glitches
     },
   },
 });

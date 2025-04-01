@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { Image } from "@shared/schema";
 import { motion } from "framer-motion";
@@ -9,21 +9,64 @@ interface ImageCardProps {
 }
 
 export default function ImageCard({ image, onClick }: ImageCardProps) {
+  const [isLoaded, setIsLoaded] = useState(false);
+  const [isInView, setIsInView] = useState(false);
+
+  // Use Intersection Observer to detect when image is in viewport
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting) {
+          setIsInView(true);
+          observer.disconnect();
+        }
+      },
+      { threshold: 0.1 }
+    );
+
+    const element = document.getElementById(`image-card-${image.id}`);
+    if (element) {
+      observer.observe(element);
+    }
+
+    return () => {
+      observer.disconnect();
+    };
+  }, [image.id]);
+
   return (
-    <Card className="bg-background/50 backdrop-blur-lg rounded-xl overflow-hidden group relative cursor-pointer" onClick={onClick}>
-      <div className="h-64 overflow-hidden">
-        <img 
-          src={image.imageUrl} 
-          alt={image.title} 
-          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-        />
+    <Card 
+      id={`image-card-${image.id}`}
+      className="bg-background/50 backdrop-blur-lg rounded-xl overflow-hidden group relative cursor-pointer" 
+      onClick={onClick}
+    >
+      <div className="h-64 overflow-hidden relative">
+        {/* Show low-quality placeholder or loading skeleton */}
+        {!isLoaded && (
+          <div className="absolute inset-0 bg-background/50 animate-pulse flex items-center justify-center">
+            <div className="w-8 h-8 border-2 border-purple-500 border-t-transparent rounded-full animate-spin"></div>
+          </div>
+        )}
+        
+        {/* Only load the image when it's in view (lazy loading) */}
+        {isInView && (
+          <img 
+            src={image.imageUrl} 
+            alt={image.title} 
+            className={`w-full h-full object-cover group-hover:scale-105 transition-transform duration-300 ${
+              isLoaded ? 'opacity-100' : 'opacity-0'
+            }`}
+            onLoad={() => setIsLoaded(true)}
+            loading="lazy"
+          />
+        )}
       </div>
       
       <div className="p-4">
         <div className="flex items-center justify-between mb-2">
           <h3 className="text-sm font-medium truncate">{image.title}</h3>
           <span className="text-xs text-gray-400">
-            {new Date(image.createdAt).toLocaleDateString()}
+            {image.createdAt ? new Date(image.createdAt).toLocaleDateString() : 'Recent'}
           </span>
         </div>
         <p className="text-xs text-gray-400 truncate">Created with {image.model}</p>

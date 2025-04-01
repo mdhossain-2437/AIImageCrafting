@@ -1,4 +1,4 @@
-import React from "react";
+import React, { memo } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Link } from "wouter";
@@ -12,7 +12,8 @@ interface QuickActionCardProps {
   path: string;
 }
 
-export default function QuickActionCard({ 
+// Using React.memo to prevent unnecessary re-renders
+function QuickActionCard({ 
   title, 
   description, 
   icon, 
@@ -44,3 +45,6 @@ export default function QuickActionCard({
     </Card>
   );
 }
+
+// Export the memoized component to prevent unnecessary re-renders
+export default memo(QuickActionCard);
