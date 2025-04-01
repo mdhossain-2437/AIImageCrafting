@@ -102,7 +102,6 @@ export default function Sidebar() {
             </div>
             <h1 className="text-xl font-bold bg-gradient-to-r from-purple-500 via-blue-500 to-violet-500 bg-clip-text text-transparent animate-gradient bg-size-200 group-hover:scale-105 transition-transform duration-300">
               ArtificeAI
-              <span className="absolute top-0 left-0 w-full h-full bg-gradient-to-r from-purple-500/0 via-white/20 to-purple-500/0 -skew-x-[20deg] animate-shine"></span>
             </h1>
           </div>
           

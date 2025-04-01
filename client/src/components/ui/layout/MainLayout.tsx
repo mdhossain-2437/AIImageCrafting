@@ -49,8 +49,8 @@ export default function MainLayout({ children }: MainLayoutProps) {
         <div className="absolute top-[65%] right-[35%] w-10 h-10 bg-violet-500/20 rounded-full blur-md animate-float" style={{ animationDelay: "3s" }}></div>
       </div>
       
-      {/* Grid pattern overlay */}
-      <div className="absolute inset-0 bg-[linear-gradient(rgba(20,20,30,0.1)_1px,transparent_1px),linear-gradient(90deg,rgba(20,20,30,0.1)_1px,transparent_1px)] bg-[size:40px_40px] [mask-image:radial-gradient(ellipse_at_center,transparent_20%,black_70%)] pointer-events-none"></div>
+      {/* Subtle grid pattern without shiny effect */}
+      <div className="absolute inset-0 bg-[linear-gradient(rgba(20,20,30,0.05)_1px,transparent_1px),linear-gradient(90deg,rgba(20,20,30,0.05)_1px,transparent_1px)] bg-[size:40px_40px] opacity-30 pointer-events-none"></div>
       
       {/* Main content */}
       <Sidebar />

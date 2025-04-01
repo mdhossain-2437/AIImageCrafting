@@ -173,14 +173,7 @@
   }
 }
 
-@keyframes shine {
-  from {
-    transform: translateX(-100%) skewX(20deg);
-  }
-  to {
-    transform: translateX(200%) skewX(20deg);
-  }
-}
+/* Shine effect removed */
 
 @keyframes breathe {
   0%, 100% {
@@ -191,14 +184,7 @@
   }
 }
 
-@keyframes text-shimmer {
-  0% {
-    background-position: -100% 0;
-  }
-  100% {
-    background-position: 200% 0;
-  }
-}
+/* Removed text shimmer keyframes */
 
 @keyframes border-glow {
   0%, 100% {
@@ -231,22 +217,13 @@
     animation: pulse-glow 3s infinite;
   }
   
-  .animate-shine {
-    animation: shine 3s ease-in-out infinite;
-    animation-delay: 0.5s;
-  }
+  /* Removed shine animation */
   
   .animate-breathe {
     animation: breathe 4s ease-in-out infinite;
   }
   
-  .animate-text-shimmer {
-    animation: text-shimmer 3s infinite linear;
-    background: linear-gradient(to right, transparent 0%, white 50%, transparent 100%);
-    background-size: 200% 100%;
-    -webkit-background-clip: text;
-    background-clip: text;
-  }
+  /* Removed text shimmer */
   
   .animate-border-glow {
     animation: border-glow 2s infinite;

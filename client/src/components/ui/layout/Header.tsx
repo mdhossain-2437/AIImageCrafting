@@ -75,9 +75,8 @@ export default function Header() {
           <div className="relative group cursor-pointer" onClick={() => window.location.href = "/login"}>
             <div className="absolute inset-0 bg-gradient-to-r from-purple-600 to-blue-600 rounded-md blur-md opacity-70 group-hover:opacity-100 transition-all duration-300 animate-pulse-glow"></div>
             <div className="bg-gradient-to-r from-purple-500 to-blue-500 p-[2px] rounded-md overflow-hidden hover:p-[3px] transition-all duration-300 relative">
-              <div className="relative bg-background/90 text-white py-1.5 px-4 rounded-[3px] text-sm font-medium group-hover:bg-transparent transition-all duration-300 overflow-hidden">
+              <div className="relative bg-background/90 text-white py-1.5 px-4 rounded-[3px] text-sm font-medium group-hover:bg-transparent transition-all duration-300">
                 Login
-                <span className="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></span>
               </div>
             </div>
           </div>
