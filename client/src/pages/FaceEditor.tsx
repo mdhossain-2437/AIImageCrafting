@@ -2,6 +2,7 @@ import React, { useState, useRef } from "react";
 import { toast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { editFace, editObjects, FaceEditingParams, ObjectEditingParams } from "@/lib/api";
+import LoadingSpinner from "@/components/ui/LoadingSpinner";
 import { 
   Tabs, 
   TabsContent, 
@@ -262,8 +263,8 @@ export default function FaceEditor() {
                     >
                       {isEditing ? (
                         <div className="flex items-center">
-                          <i className="ri-loader-4-line animate-spin mr-2"></i>
-                          Applying Edits...
+                          <LoadingSpinner size="sm" />
+                          <span className="ml-2">Applying Edits...</span>
                         </div>
                       ) : (
                         <div className="flex items-center">

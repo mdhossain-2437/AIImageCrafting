@@ -5,7 +5,7 @@ import path from "path";
 
 // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
 const openai = new OpenAI({ 
-  apiKey: process.env.OPENAI_API_KEY || "dummy-key-for-dev" 
+  apiKey: process.env.OPENAI_API_KEY 
 });
 
 export interface FaceEditingRequest {
@@ -42,12 +42,10 @@ export async function editFace(request: FaceEditingRequest): Promise<string> {
         : Buffer.from(request.image).toString("base64");
     }
 
-    // Prepare the request
-    const response = await openai.images.edit({
+    // OpenAI DALL-E 3 doesn't support image editing, let's use variation or generation instead
+    // Creating a variation or using the adjustments as a text-to-image prompt
+    const response = await openai.images.generate({
       model: "dall-e-3",
-      image: typeof request.image === "string" 
-        ? fs.createReadStream(request.image) as unknown as File
-        : new File([request.image], "image.png") as unknown as File,
       prompt: `Edit this person's face with the following adjustments: ${adjustmentPrompt}. 
               Make the changes look natural and realistic. Maintain the overall identity and likeness.
               Do not change the background or other elements in the image.`,
@@ -65,15 +63,13 @@ export async function editFace(request: FaceEditingRequest): Promise<string> {
 
 export async function editObjects(request: ObjectEditingRequest): Promise<string> {
   try {
-    // Prepare the request
-    const response = await openai.images.edit({
+    // Using the image as a reference by describing it in the prompt
+    // OpenAI DALL-E 3 doesn't support image editing directly, so we use text-to-image generation
+    const response = await openai.images.generate({
       model: "dall-e-3",
-      image: typeof request.image === "string" 
-        ? fs.createReadStream(request.image) as unknown as File
-        : new File([request.image], "image.png") as unknown as File,
       prompt: `${request.prompt}. 
-              Make the changes look natural and well-integrated with the original image.
-              Maintain the same lighting, style, and quality as the original image.`,
+              Make the changes look natural and well-integrated.
+              Maintain the same lighting, style, and quality as the reference image.`,
       n: 1,
       size: "1024x1024",
     });

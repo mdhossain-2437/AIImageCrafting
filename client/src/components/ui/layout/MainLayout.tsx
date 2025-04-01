@@ -1,6 +1,7 @@
 import React from "react";
 import Sidebar from "./Sidebar";
 import Header from "./Header";
+import LoadingScreen from "@/components/ui/LoadingScreen";
 import { useAuth } from "@/hooks/useAuth";
 import { useLocation } from "wouter";
 
@@ -19,11 +20,7 @@ export default function MainLayout({ children }: MainLayoutProps) {
   }, [user, loading, location, navigate]);
 
   if (loading) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <p className="text-foreground">Loading...</p>
-      </div>
-    );
+    return <LoadingScreen message="Loading your experience" />;
   }
 
   return (
