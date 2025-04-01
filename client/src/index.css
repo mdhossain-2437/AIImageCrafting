@@ -164,14 +164,59 @@
   }
 }
 
+@keyframes pulse-glow {
+  0%, 100% {
+    box-shadow: 0 0 5px 2px rgba(168, 85, 247, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 15px 5px rgba(168, 85, 247, 0.7);
+  }
+}
+
+@keyframes shine {
+  from {
+    transform: translateX(-100%) skewX(20deg);
+  }
+  to {
+    transform: translateX(200%) skewX(20deg);
+  }
+}
+
+@keyframes breathe {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+}
+
+@keyframes text-shimmer {
+  0% {
+    background-position: -100% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+@keyframes border-glow {
+  0%, 100% {
+    border-color: rgba(168, 85, 247, 0.3);
+  }
+  50% {
+    border-color: rgba(168, 85, 247, 0.8);
+  }
+}
+
 @layer utilities {
   .animate-float {
-    animation: float 3s ease-in-out infinite;
+    animation: float 4s ease-in-out infinite;
   }
   
   .animate-gradient {
     background-size: 200% 200%;
-    animation: gradient-shift 4s ease infinite;
+    animation: gradient-shift 5s ease infinite;
   }
   
   .animate-fade-in {
@@ -179,6 +224,35 @@
   }
   
   .animate-slow-spin {
-    animation: slow-spin 8s linear infinite;
+    animation: slow-spin 10s linear infinite;
+  }
+  
+  .animate-pulse-glow {
+    animation: pulse-glow 3s infinite;
+  }
+  
+  .animate-shine {
+    animation: shine 3s ease-in-out infinite;
+    animation-delay: 0.5s;
+  }
+  
+  .animate-breathe {
+    animation: breathe 4s ease-in-out infinite;
+  }
+  
+  .animate-text-shimmer {
+    animation: text-shimmer 3s infinite linear;
+    background: linear-gradient(to right, transparent 0%, white 50%, transparent 100%);
+    background-size: 200% 100%;
+    -webkit-background-clip: text;
+    background-clip: text;
+  }
+  
+  .animate-border-glow {
+    animation: border-glow 2s infinite;
+  }
+  
+  .bg-size-200 {
+    background-size: 200% 200%;
   }
 }
