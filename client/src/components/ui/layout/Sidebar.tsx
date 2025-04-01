@@ -137,6 +137,9 @@ export default function Sidebar() {
             <li>
               <NavLink href="/face-cloning" icon="ri-user-face-line text-lg">Face Cloning</NavLink>
             </li>
+            <li>
+              <NavLink href="/face-editor" icon="ri-edit-2-line text-lg">Face & Object Editor</NavLink>
+            </li>
           </ul>
         </nav>
 

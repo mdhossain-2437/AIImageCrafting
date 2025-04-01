@@ -17,6 +17,18 @@ export interface FaceCloningParams extends GenerateImageParams {
   face: File;
 }
 
+export interface FaceEditingParams {
+  image: File;
+  adjustments: Record<string, number>;
+  userId?: number;
+}
+
+export interface ObjectEditingParams {
+  image: File;
+  prompt: string;
+  userId?: number;
+}
+
 export interface GenerateImageResponse {
   success: boolean;
   imageUrl: string;
@@ -138,5 +150,53 @@ export async function login(username: string, password: string) {
 
 export async function register(userData: any) {
   const response = await apiRequest("POST", "/api/auth/register", userData);
+  return response.json();
+}
+
+// Face Editing API
+export async function editFace(params: FaceEditingParams): Promise<GenerateImageResponse> {
+  const formData = new FormData();
+  formData.append("image", params.image);
+  formData.append("adjustments", JSON.stringify(params.adjustments));
+  
+  if (params.userId) {
+    formData.append("userId", params.userId.toString());
+  }
+  
+  const response = await fetch("/api/images/edit-face", {
+    method: "POST",
+    body: formData,
+    credentials: "include",
+  });
+  
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(errorText || response.statusText);
+  }
+  
+  return response.json();
+}
+
+// Object Editing API
+export async function editObjects(params: ObjectEditingParams): Promise<GenerateImageResponse> {
+  const formData = new FormData();
+  formData.append("image", params.image);
+  formData.append("prompt", params.prompt);
+  
+  if (params.userId) {
+    formData.append("userId", params.userId.toString());
+  }
+  
+  const response = await fetch("/api/images/edit-objects", {
+    method: "POST",
+    body: formData,
+    credentials: "include",
+  });
+  
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(errorText || response.statusText);
+  }
+  
   return response.json();
 }

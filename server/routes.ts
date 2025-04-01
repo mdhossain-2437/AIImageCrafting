@@ -9,6 +9,7 @@ import fs from "fs/promises";
 import path from "path";
 import { z } from "zod";
 import { insertImageSchema, insertUserSchema } from "@shared/schema";
+import openai from "./openai";
 
 // Configure multer for image uploads
 const upload = multer({
@@ -289,6 +290,104 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(200).json(presets);
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch style presets" });
+    }
+  });
+
+  // Face & Object Editing routes
+  app.post("/api/images/edit-face", upload.single("image"), async (req: Request, res: Response) => {
+    try {
+      const { adjustments, userId } = req.body;
+      const imageFile = req.file;
+      
+      if (!imageFile || !adjustments) {
+        return res.status(400).json({ message: "Image and adjustments are required" });
+      }
+      
+      // Process the uploaded image
+      const processedImageBuffer = await sharp(imageFile.buffer)
+        .resize(1024, 1024, { fit: "contain" })
+        .toBuffer();
+      
+      // Parse adjustments from JSON string if needed
+      const parsedAdjustments = typeof adjustments === "string" 
+        ? JSON.parse(adjustments) 
+        : adjustments;
+      
+      // Call OpenAI for face editing
+      const imageUrl = await openai.editFace({
+        image: processedImageBuffer,
+        adjustments: parsedAdjustments,
+      });
+      
+      // Store the generated image if userId is provided
+      let savedImage = null;
+      if (userId) {
+        savedImage = await storage.createImage({
+          userId: parseInt(userId),
+          title: "Face Edit",
+          prompt: "Face editing with adjustments: " + JSON.stringify(parsedAdjustments),
+          imageUrl,
+          width: 1024,
+          height: 1024,
+          model: "dalle",
+          metadata: { faceEditing: true, adjustments: parsedAdjustments }
+        });
+      }
+      
+      res.status(200).json({
+        success: true,
+        imageUrl,
+        image: savedImage
+      });
+    } catch (error) {
+      console.error("Face editing error:", error);
+      res.status(500).json({ message: "Failed to edit face" });
+    }
+  });
+  
+  app.post("/api/images/edit-objects", upload.single("image"), async (req: Request, res: Response) => {
+    try {
+      const { prompt, userId } = req.body;
+      const imageFile = req.file;
+      
+      if (!imageFile || !prompt) {
+        return res.status(400).json({ message: "Image and prompt are required" });
+      }
+      
+      // Process the uploaded image
+      const processedImageBuffer = await sharp(imageFile.buffer)
+        .resize(1024, 1024, { fit: "contain" })
+        .toBuffer();
+      
+      // Call OpenAI for object editing
+      const imageUrl = await openai.editObjects({
+        image: processedImageBuffer,
+        prompt,
+      });
+      
+      // Store the generated image if userId is provided
+      let savedImage = null;
+      if (userId) {
+        savedImage = await storage.createImage({
+          userId: parseInt(userId),
+          title: prompt.slice(0, 50),
+          prompt,
+          imageUrl,
+          width: 1024,
+          height: 1024,
+          model: "dalle",
+          metadata: { objectEditing: true }
+        });
+      }
+      
+      res.status(200).json({
+        success: true,
+        imageUrl,
+        image: savedImage
+      });
+    } catch (error) {
+      console.error("Object editing error:", error);
+      res.status(500).json({ message: "Failed to edit objects" });
     }
   });
 

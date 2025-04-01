@@ -7,6 +7,7 @@ import Dashboard from "@/pages/Dashboard";
 import TextToImage from "@/pages/TextToImage";
 import ImageToImage from "@/pages/ImageToImage";
 import FaceCloning from "@/pages/FaceCloning";
+import FaceEditor from "@/pages/FaceEditor";
 import Gallery from "@/pages/Gallery";
 import Login from "@/pages/Login";
 import { useAuth } from "./hooks/useAuth";
@@ -53,6 +54,12 @@ function Router() {
       <Route path="/face-cloning">
         <MainLayout>
           <FaceCloning />
+        </MainLayout>
+      </Route>
+      
+      <Route path="/face-editor">
+        <MainLayout>
+          <FaceEditor />
         </MainLayout>
       </Route>
       
