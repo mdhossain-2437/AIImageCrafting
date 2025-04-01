@@ -32,7 +32,7 @@ const registerSchema = z.object({
 });
 
 export default function Login() {
-  const { login, register, loginWithGoogle, loading, user } = useAuth();
+  const { login, register, loginWithGoogle, continueAsGuest, loading, user } = useAuth();
   const [_, navigate] = useLocation();
   const [activeTab, setActiveTab] = useState<string>("login");
   const [loginError, setLoginError] = useState<string | null>(null);
@@ -84,11 +84,7 @@ export default function Login() {
   };
 
   const handleContinueAsGuest = () => {
-    navigate("/");
-    toast({
-      title: "Continuing as guest",
-      description: "Some features will be limited. Sign in anytime to access all features.",
-    });
+    continueAsGuest();
   };
 
   const handleLogin = async (values: z.infer<typeof loginSchema>) => {

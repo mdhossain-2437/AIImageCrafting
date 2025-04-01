@@ -1,6 +1,7 @@
 import React, { createContext, useState, useEffect } from "react";
 import { User } from "@shared/schema";
 import { useToast } from "@/hooks/use-toast";
+import { ToastAction } from "@/components/ui/toast";
 import { 
   auth, 
   signInWithGoogle as firebaseSignInWithGoogle,
@@ -15,10 +16,13 @@ interface AuthContextType {
   user: User | null;
   loading: boolean;
   error: string | null;
+  isGuest: boolean;
   login: (username: string, password: string) => Promise<User>;
   register: (userData: any) => Promise<User>;
   loginWithGoogle: () => Promise<void>;
+  continueAsGuest: () => void;
   signOut: () => Promise<void>;
+  requireAuth: (action: string, callback?: () => void) => boolean;
 }
 
 // Firebase user to app User mapper
@@ -38,6 +42,7 @@ export const AuthContext = createContext<AuthContextType>({
   user: null,
   loading: false,
   error: null,
+  isGuest: false,
   login: async () => ({ 
     id: 0, 
     username: '', 
@@ -57,13 +62,16 @@ export const AuthContext = createContext<AuthContextType>({
     createdAt: new Date() 
   }),
   loginWithGoogle: async () => {},
+  continueAsGuest: () => {},
   signOut: async () => {},
+  requireAuth: () => false,
 });
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isGuest, setIsGuest] = useState<boolean>(false);
   const { toast } = useToast();
   const [_, navigate] = useLocation();
 
@@ -237,6 +245,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       
       await firebaseSignOut();
       setUser(null);
+      setIsGuest(false);
       
       toast({
         title: "Logged Out",
@@ -259,14 +268,67 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
+  // Continue as guest implementation
+  const continueAsGuest = (): void => {
+    setIsGuest(true);
+    
+    // Create a guest user
+    const guestUser: User = {
+      id: Math.floor(Math.random() * 10000),
+      username: 'guest',
+      password: '',
+      email: 'guest@example.com',
+      displayName: 'Guest User',
+      avatar: null,
+      createdAt: new Date(),
+    };
+    
+    setUser(guestUser);
+    navigate("/");
+    
+    toast({
+      title: "Guest Access",
+      description: "You're browsing as a guest. Some features will be limited.",
+    });
+  };
+  
+  // Require auth for protected actions
+  const requireAuth = (action: string, callback?: () => void): boolean => {
+    if (user && !isGuest) {
+      // User is logged in and not a guest
+      if (callback) callback();
+      return true;
+    } else if (isGuest) {
+      // User is a guest, show login dialog
+      toast({
+        title: "Login Required",
+        description: `Please log in to ${action}`,
+        variant: "destructive",
+        action: (
+          <ToastAction altText="Login" onClick={() => navigate("/login")}>
+            Login
+          </ToastAction>
+        ),
+      });
+      return false;
+    } else {
+      // No user at all, redirect to login
+      navigate("/login");
+      return false;
+    }
+  };
+
   const contextValue: AuthContextType = {
     user,
     loading,
     error,
+    isGuest,
     login,
     register,
     loginWithGoogle,
+    continueAsGuest,
     signOut,
+    requireAuth,
   };
 
   return <AuthContext.Provider value={contextValue}>{children}</AuthContext.Provider>;

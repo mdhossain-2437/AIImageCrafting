@@ -21,7 +21,7 @@ export default function ImageDownloadButton({
   className = "",
   children,
 }: ImageDownloadButtonProps) {
-  const { user } = useAuth();
+  const { user, isGuest, requireAuth } = useAuth();
   const [loginDialogOpen, setLoginDialogOpen] = useState(false);
   const { toast } = useToast();
 
@@ -64,10 +64,15 @@ export default function ImageDownloadButton({
   };
 
   const handleClick = () => {
-    if (user) {
+    if (isGuest) {
+      // Open dialog for guest users
+      setLoginDialogOpen(true);
+    } else if (user) {
+      // Authorized users can download directly
       downloadImage();
     } else {
-      setLoginDialogOpen(true);
+      // No user at all, use requireAuth to handle redirect
+      requireAuth("download images");
     }
   };
 
