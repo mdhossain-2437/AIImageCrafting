@@ -45,8 +45,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const mockUser: User = {
         id: 1,
         username,
+        password: "", // Password should not be exposed in the client
         email: `${username}@example.com`,
         displayName: username.charAt(0).toUpperCase() + username.slice(1),
+        avatar: null,
         createdAt: new Date(),
       };
       
@@ -81,8 +83,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const mockUser: User = {
         id: 1,
         username: userData.username,
+        password: "", // Password should not be exposed in the client
         email: userData.email,
         displayName: userData.displayName || userData.username,
+        avatar: null,
         createdAt: new Date(),
       };
       
@@ -117,8 +121,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const mockUser: User = {
         id: 1,
         username: "demouser",
+        password: "", // Password should not be exposed in the client
         email: "demo@example.com",
         displayName: "Demo User",
+        avatar: null,
         createdAt: new Date(),
       };
       
