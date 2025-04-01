@@ -1,7 +1,5 @@
 import React, { createContext, useState, useEffect } from "react";
-import { auth, signInWithGoogle, signOut as firebaseSignOut } from "@/lib/firebase";
 import { User } from "@shared/schema";
-import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 
 interface AuthContextType {
@@ -14,63 +12,52 @@ interface AuthContextType {
   signOut: () => Promise<void>;
 }
 
+// Create a default user for the demo app
+const defaultUser: User = {
+  id: 1,
+  username: "demouser",
+  password: "",
+  email: "demo@example.com",
+  displayName: "Demo User",
+  avatar: null,
+  createdAt: new Date(),
+};
+
 export const AuthContext = createContext<AuthContextType>({
-  user: null,
-  loading: true,
+  user: defaultUser, // Initialize with default user
+  loading: false,
   error: null,
-  login: async () => ({ id: 0 } as User),
-  register: async () => ({ id: 0 } as User),
+  login: async () => defaultUser,
+  register: async () => defaultUser,
   loginWithGoogle: async () => {},
   signOut: async () => {},
 });
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(true); // Start with loading true
+  // Initialize with the default user - no loading state needed
+  const [user, setUser] = useState<User>(defaultUser);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
 
-  // Check if user is already logged in (simplified for demo)
-  useEffect(() => {
-    // For demo purposes, create a mock default user
-    const defaultUser: User = {
-      id: 1,
-      username: "demouser",
-      password: "",
-      email: "demo@example.com",
-      displayName: "Demo User",
-      avatar: null,
-      createdAt: new Date(),
-    };
-    
-    setUser(defaultUser);
-    setLoading(false);
-  }, []);
-
-  // Login with username and password
+  // Login with username and password (simplified)
   const login = async (username: string, password: string): Promise<User> => {
     try {
       setLoading(true);
-      
-      // Demo login - create a mock user
-      const mockUser: User = {
-        id: 1,
+      // Demo login
+      const loginUser = {
+        ...defaultUser,
         username,
-        password: "", // Password should not be exposed in the client
-        email: `${username}@example.com`,
         displayName: username.charAt(0).toUpperCase() + username.slice(1),
-        avatar: null,
-        createdAt: new Date(),
       };
-      
-      setUser(mockUser);
+      setUser(loginUser);
       
       toast({
         title: "Login Successful",
         description: "You are now logged in to the demo mode",
       });
       
-      return mockUser;
+      return loginUser;
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : "Login failed";
       setError(errorMessage);
@@ -85,30 +72,26 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  // Register new user
+  // Register new user (simplified)
   const register = async (userData: any): Promise<User> => {
     try {
       setLoading(true);
       
-      // Demo registration - create a mock user
-      const mockUser: User = {
-        id: 1,
+      const registerUser = {
+        ...defaultUser,
         username: userData.username,
-        password: "", // Password should not be exposed in the client
         email: userData.email,
         displayName: userData.displayName || userData.username,
-        avatar: null,
-        createdAt: new Date(),
       };
       
-      setUser(mockUser);
+      setUser(registerUser);
       
       toast({
         title: "Registration Successful",
         description: "Account created in demo mode",
       });
       
-      return mockUser;
+      return registerUser;
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : "Registration failed";
       setError(errorMessage);
@@ -123,23 +106,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  // Login with Google
+  // Login with Google (simplified)
   const loginWithGoogle = async (): Promise<void> => {
     try {
       setLoading(true);
       
-      // Demo Google login
-      const mockUser: User = {
-        id: 1,
-        username: "demouser",
-        password: "", // Password should not be exposed in the client
-        email: "demo@example.com",
-        displayName: "Demo User",
-        avatar: null,
-        createdAt: new Date(),
-      };
-      
-      setUser(mockUser);
+      // Just use the default user
+      setUser(defaultUser);
       
       toast({
         title: "Google Login",
@@ -159,14 +132,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  // Sign out
+  // Sign out (simplified)
   const signOut = async (): Promise<void> => {
     try {
       setLoading(true);
-      setUser(null);
+      // For demo, we don't actually sign out - just show the message
       toast({
         title: "Logged Out",
-        description: "You have been logged out successfully",
+        description: "You would be logged out in a real app",
       });
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : "Logout failed";

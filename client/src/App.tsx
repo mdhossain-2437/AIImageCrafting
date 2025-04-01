@@ -2,7 +2,6 @@ import { Switch, Route } from "wouter";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
-import LoadingScreen from "@/components/ui/LoadingScreen";
 import NotFound from "@/pages/not-found";
 import Dashboard from "@/pages/Dashboard";
 import TextToImage from "@/pages/TextToImage";
@@ -11,23 +10,7 @@ import FaceCloning from "@/pages/FaceCloning";
 import FaceEditor from "@/pages/FaceEditor";
 import Gallery from "@/pages/Gallery";
 import Login from "@/pages/Login";
-import { useAuth } from "./hooks/useAuth";
 import MainLayout from "./components/ui/layout/MainLayout";
-
-function ProtectedRoute({ component: Component, ...rest }: any) {
-  const { user, loading } = useAuth();
-  
-  if (loading) {
-    return <LoadingScreen message="Authentication in progress" />;
-  }
-  
-  if (!user) {
-    window.location.href = "/login";
-    return null;
-  }
-  
-  return <Component {...rest} />;
-}
 
 function Router() {
   return (
@@ -80,12 +63,6 @@ function Router() {
 }
 
 function App() {
-  const { loading } = useAuth();
-  
-  if (loading) {
-    return <LoadingScreen message="Starting up the application" />;
-  }
-  
   return (
     <QueryClientProvider client={queryClient}>
       <Router />
