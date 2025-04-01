@@ -1,6 +1,5 @@
 import React, { createContext, useState, useEffect } from "react";
 import { auth, signInWithGoogle, signOut as firebaseSignOut } from "@/lib/firebase";
-import { onAuthStateChanged } from "firebase/auth";
 import { User } from "@shared/schema";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
@@ -27,59 +26,38 @@ export const AuthContext = createContext<AuthContextType>({
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
 
-  // Check if user is already logged in
+  // Check if user is already logged in (simplified for demo)
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
-      if (firebaseUser) {
-        try {
-          // Check if user exists in our database, otherwise create one
-          // In a real app, this would be a proper API call
-          const userResponse = await apiRequest("POST", "/api/auth/firebase-login", {
-            uid: firebaseUser.uid,
-            email: firebaseUser.email,
-            displayName: firebaseUser.displayName,
-            avatar: firebaseUser.photoURL,
-          });
-          
-          if (userResponse.ok) {
-            const userData = await userResponse.json();
-            setUser(userData);
-          } else {
-            // Fallback to using a simple version of the user data
-            setUser({
-              id: 1, // Mock ID since we don't have a real one from backend
-              username: firebaseUser.email?.split('@')[0] || 'user',
-              email: firebaseUser.email || '',
-              displayName: firebaseUser.displayName || '',
-              avatar: firebaseUser.photoURL || '',
-              createdAt: new Date(),
-            } as User);
-          }
-        } catch (err) {
-          console.error("Error fetching user data:", err);
-          setError("Failed to fetch user data");
-        }
-      } else {
-        setUser(null);
-      }
-      setLoading(false);
-    });
-
-    return () => unsubscribe();
+    // For demo purposes, there's no existing auth state
+    setLoading(false);
   }, []);
 
   // Login with username and password
   const login = async (username: string, password: string): Promise<User> => {
     try {
       setLoading(true);
-      const response = await apiRequest("POST", "/api/auth/login", { username, password });
-      const userData = await response.json();
-      setUser(userData);
-      return userData;
+      
+      // Demo login - create a mock user
+      const mockUser: User = {
+        id: 1,
+        username,
+        email: `${username}@example.com`,
+        displayName: username.charAt(0).toUpperCase() + username.slice(1),
+        createdAt: new Date(),
+      };
+      
+      setUser(mockUser);
+      
+      toast({
+        title: "Login Successful",
+        description: "You are now logged in to the demo mode",
+      });
+      
+      return mockUser;
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : "Login failed";
       setError(errorMessage);
@@ -98,10 +76,24 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const register = async (userData: any): Promise<User> => {
     try {
       setLoading(true);
-      const response = await apiRequest("POST", "/api/auth/register", userData);
-      const newUser = await response.json();
-      setUser(newUser);
-      return newUser;
+      
+      // Demo registration - create a mock user
+      const mockUser: User = {
+        id: 1,
+        username: userData.username,
+        email: userData.email,
+        displayName: userData.displayName || userData.username,
+        createdAt: new Date(),
+      };
+      
+      setUser(mockUser);
+      
+      toast({
+        title: "Registration Successful",
+        description: "Account created in demo mode",
+      });
+      
+      return mockUser;
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : "Registration failed";
       setError(errorMessage);
@@ -120,8 +112,22 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const loginWithGoogle = async (): Promise<void> => {
     try {
       setLoading(true);
-      await signInWithGoogle();
-      // User state will be updated by the onAuthStateChanged listener
+      
+      // Demo Google login
+      const mockUser: User = {
+        id: 1,
+        username: "demouser",
+        email: "demo@example.com",
+        displayName: "Demo User",
+        createdAt: new Date(),
+      };
+      
+      setUser(mockUser);
+      
+      toast({
+        title: "Google Login",
+        description: "Logged in with Google in demo mode",
+      });
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : "Google login failed";
       setError(errorMessage);
@@ -140,7 +146,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const signOut = async (): Promise<void> => {
     try {
       setLoading(true);
-      await firebaseSignOut();
       setUser(null);
       toast({
         title: "Logged Out",
