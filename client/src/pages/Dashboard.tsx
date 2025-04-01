@@ -164,12 +164,13 @@ export default function Dashboard() {
         >
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-xl font-semibold">Your Recent Creations</h2>
-            <Link href="/gallery">
-              <a className="text-sm text-purple-500 hover:underline flex items-center">
-                <span>View All</span>
-                <i className="ri-arrow-right-line ml-1"></i>
-              </a>
-            </Link>
+            <div 
+              onClick={() => window.location.href = "/gallery"} 
+              className="text-sm text-purple-500 hover:underline flex items-center cursor-pointer"
+            >
+              <span>View All</span>
+              <i className="ri-arrow-right-line ml-1"></i>
+            </div>
           </div>
           
           {isLoadingImages ? (
@@ -216,12 +217,13 @@ export default function Dashboard() {
       >
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-xl font-semibold">Available AI Models</h2>
-          <Link href="/models">
-            <a className="text-sm text-purple-500 hover:underline flex items-center">
-              <span>Compare Models</span>
-              <i className="ri-arrow-right-line ml-1"></i>
-            </a>
-          </Link>
+          <div 
+            onClick={() => window.location.href = "/models"} 
+            className="text-sm text-purple-500 hover:underline flex items-center cursor-pointer"
+          >
+            <span>Compare Models</span>
+            <i className="ri-arrow-right-line ml-1"></i>
+          </div>
         </div>
         
         {isLoadingModels ? (

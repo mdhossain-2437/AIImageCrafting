@@ -31,14 +31,13 @@ export default function QuickActionCard({
       
       <p className="text-sm text-gray-400 mb-4">{description}</p>
       
-      <Link href={path}>
-        <Button 
-          variant="outline" 
-          className={`w-full border-${gradientFrom}/30 text-${gradientFrom} hover:bg-${gradientFrom}/10`}
-        >
-          Get Started
-        </Button>
-      </Link>
+      <Button 
+        variant="outline" 
+        className={`w-full border-${gradientFrom}/30 text-${gradientFrom} hover:bg-${gradientFrom}/10`}
+        onClick={() => window.location.href = path}
+      >
+        Get Started
+      </Button>
       
       {/* Gradient border effect */}
       <div className="absolute inset-0 -z-10 rounded-xl border-[1px] border-transparent bg-gradient-to-r from-purple-500/20 to-blue-500/20 p-[1px]"></div>

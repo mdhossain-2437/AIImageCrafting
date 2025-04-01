@@ -19,6 +19,7 @@ export default function Sidebar() {
 
   const NavLink = ({ href, icon, children }: { href: string, icon: string, children: React.ReactNode }) => {
     const isActive = location === href;
+    const [_, navigate] = useLocation();
     
     return (
       <div className="relative group">
@@ -33,7 +34,7 @@ export default function Sidebar() {
         </div>
         
         <div 
-          onClick={() => window.location.href = href}
+          onClick={() => navigate(href)}
           className={cn(
             "flex items-center space-x-3 px-4 py-3.5 rounded-lg transition-all duration-500 cursor-pointer relative z-10",
             "transform hover:translate-x-1 group-hover:shadow-[0_0_8px_rgba(139,92,246,0.3)]",
