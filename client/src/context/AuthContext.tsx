@@ -1,6 +1,15 @@
 import React, { createContext, useState, useEffect } from "react";
 import { User } from "@shared/schema";
 import { useToast } from "@/hooks/use-toast";
+import { 
+  auth, 
+  signInWithGoogle as firebaseSignInWithGoogle,
+  signOut as firebaseSignOut,
+  handleRedirectResult,
+  saveUserToFirestore
+} from "@/lib/firebase";
+import { onAuthStateChanged, User as FirebaseUser } from "firebase/auth";
+import { useLocation } from "wouter";
 
 interface AuthContextType {
   user: User | null;
@@ -12,52 +21,98 @@ interface AuthContextType {
   signOut: () => Promise<void>;
 }
 
-// Create a default user for the demo app
-const defaultUser: User = {
-  id: 1,
-  username: "demouser",
-  password: "",
-  email: "demo@example.com",
-  displayName: "Demo User",
-  avatar: null,
-  createdAt: new Date(),
-};
+// Firebase user to app User mapper
+function mapFirebaseUserToUser(firebaseUser: FirebaseUser): User {
+  return {
+    id: parseInt(firebaseUser.uid.substring(0, 8), 16) || 1, // Convert part of UID to a number
+    username: firebaseUser.email?.split('@')[0] || firebaseUser.displayName || "user",
+    password: "", // We don't store passwords
+    email: firebaseUser.email || "",
+    displayName: firebaseUser.displayName || firebaseUser.email?.split('@')[0] || "User",
+    avatar: firebaseUser.photoURL,
+    createdAt: new Date(),
+  };
+}
 
 export const AuthContext = createContext<AuthContextType>({
-  user: defaultUser, // Initialize with default user
+  user: null,
   loading: false,
   error: null,
-  login: async () => defaultUser,
-  register: async () => defaultUser,
+  login: async () => ({ 
+    id: 0, 
+    username: '', 
+    password: '', 
+    email: '', 
+    displayName: '', 
+    avatar: null, 
+    createdAt: new Date() 
+  }),
+  register: async () => ({ 
+    id: 0, 
+    username: '', 
+    password: '', 
+    email: '', 
+    displayName: '', 
+    avatar: null, 
+    createdAt: new Date() 
+  }),
   loginWithGoogle: async () => {},
   signOut: async () => {},
 });
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  // Initialize with the default user - no loading state needed
-  const [user, setUser] = useState<User>(defaultUser);
-  const [loading, setLoading] = useState(false);
+  const [user, setUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
+  const [_, navigate] = useLocation();
 
-  // Login with username and password (simplified)
+  // Effect to listen for Firebase auth state changes
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+      setLoading(true);
+      try {
+        if (firebaseUser) {
+          // Map Firebase user to our app's User format
+          const mappedUser = mapFirebaseUserToUser(firebaseUser);
+          setUser(mappedUser);
+          
+          // Check for redirect result on page load (for Google sign-in)
+          const redirectUser = await handleRedirectResult();
+          if (redirectUser) {
+            toast({
+              title: "Login Successful",
+              description: `Welcome ${redirectUser.displayName || 'back'}!`,
+            });
+          }
+        } else {
+          setUser(null);
+        }
+      } catch (err) {
+        console.error("Auth state change error:", err);
+        setError(err instanceof Error ? err.message : "Authentication error");
+      } finally {
+        setLoading(false);
+      }
+    });
+
+    // Cleanup subscription on unmount
+    return () => unsubscribe();
+  }, [toast]);
+
+  // Login with username and password (NOT IMPLEMENTED WITH FIREBASE)
+  // This is kept for compatibility but redirects to Google sign-in
   const login = async (username: string, password: string): Promise<User> => {
     try {
       setLoading(true);
-      // Demo login
-      const loginUser = {
-        ...defaultUser,
-        username,
-        displayName: username.charAt(0).toUpperCase() + username.slice(1),
-      };
-      setUser(loginUser);
+      setError(null);
       
-      toast({
-        title: "Login Successful",
-        description: "You are now logged in to the demo mode",
-      });
+      // For this application, we'll only use Google sign-in
+      // Redirect to Google sign-in instead
+      await firebaseSignInWithGoogle();
       
-      return loginUser;
+      // This won't actually execute due to the redirect
+      throw new Error("This should not execute - redirect should happen");
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : "Login failed";
       setError(errorMessage);
@@ -72,26 +127,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  // Register new user (simplified)
+  // Register new user (NOT IMPLEMENTED WITH FIREBASE)
+  // This is kept for compatibility but redirects to Google sign-in
   const register = async (userData: any): Promise<User> => {
     try {
       setLoading(true);
+      setError(null);
       
-      const registerUser = {
-        ...defaultUser,
-        username: userData.username,
-        email: userData.email,
-        displayName: userData.displayName || userData.username,
-      };
+      // For this application, we'll only use Google sign-in
+      // Redirect to Google sign-in instead
+      await firebaseSignInWithGoogle();
       
-      setUser(registerUser);
-      
-      toast({
-        title: "Registration Successful",
-        description: "Account created in demo mode",
-      });
-      
-      return registerUser;
+      // This won't actually execute due to the redirect
+      throw new Error("This should not execute - redirect should happen");
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : "Registration failed";
       setError(errorMessage);
@@ -106,18 +154,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  // Login with Google (simplified)
+  // Login with Google - actual implementation
   const loginWithGoogle = async (): Promise<void> => {
     try {
       setLoading(true);
+      setError(null);
       
-      // Just use the default user
-      setUser(defaultUser);
+      // This will redirect to Google sign-in page
+      await firebaseSignInWithGoogle();
       
-      toast({
-        title: "Google Login",
-        description: "Logged in with Google in demo mode",
-      });
+      // Code after this won't execute due to redirect
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : "Google login failed";
       setError(errorMessage);
@@ -132,15 +178,22 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  // Sign out (simplified)
+  // Sign out - actual implementation
   const signOut = async (): Promise<void> => {
     try {
       setLoading(true);
-      // For demo, we don't actually sign out - just show the message
+      setError(null);
+      
+      await firebaseSignOut();
+      setUser(null);
+      
       toast({
         title: "Logged Out",
-        description: "You would be logged out in a real app",
+        description: "You have been successfully logged out",
       });
+      
+      // Redirect to login page
+      navigate("/login");
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : "Logout failed";
       setError(errorMessage);

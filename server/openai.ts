@@ -82,7 +82,62 @@ export async function editObjects(request: ObjectEditingRequest): Promise<string
   }
 }
 
+export interface TextToImageRequest {
+  prompt: string;
+  model?: string;
+  width?: number;
+  height?: number;
+}
+
+export async function generateImage(request: TextToImageRequest): Promise<string> {
+  try {
+    // Validate OpenAI API key
+    if (!process.env.OPENAI_API_KEY) {
+      log("Missing OpenAI API key", "openai");
+      throw new Error("OpenAI API key is not configured");
+    }
+
+    // Use DALL-E 3 by default
+    const model = request.model || "dall-e-3";
+    // DALL-E 3 supports 1024x1024, 1024x1792, 1792x1024 sizes
+    let size = "1024x1024"; // default square
+    
+    if (request.width && request.height) {
+      // Handle custom dimensions (DALL-E 3 has specific supported ratios)
+      const ratio = request.width / request.height;
+      
+      if (ratio > 1.5) {
+        size = "1792x1024"; // landscape
+      } else if (ratio < 0.75) {
+        size = "1024x1792"; // portrait
+      }
+    }
+
+    // Log the request
+    log(`Generating image with prompt: ${request.prompt}`, "openai");
+    
+    const response = await openai.images.generate({
+      model: model,
+      prompt: request.prompt,
+      n: 1,
+      size: size as any, // Cast to any to handle the size parameter
+      quality: "standard", // Use "hd" for higher quality (costs more)
+    });
+
+    if (!response.data[0].url) {
+      throw new Error("No image URL in response");
+    }
+
+    log(`Image generation successful`, "openai");
+    return response.data[0].url;
+  } catch (error: any) {
+    log(`Image generation error: ${error.message}`, "openai");
+    throw new Error(`Failed to generate image: ${error.message}`);
+  }
+}
+
 export default {
   editFace,
-  editObjects
+  editObjects,
+  generateImage
 };

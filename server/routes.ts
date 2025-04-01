@@ -83,42 +83,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Image generation routes
   app.post("/api/images/text-to-image", async (req: Request, res: Response) => {
     try {
-      const { prompt, model, width = 1024, height = 1024, userId } = req.body;
+      const { prompt, model = "dall-e-3", width = 1024, height = 1024, userId } = req.body;
       
-      if (!prompt || !model) {
-        return res.status(400).json({ message: "Prompt and model are required" });
+      if (!prompt) {
+        return res.status(400).json({ message: "Prompt is required" });
       }
       
-      // Call different AI models based on the selection
-      let imageUrl;
-      
-      if (model === "dalle") {
-        // Call DALL-E API
-        const response = await fetch("https://api.openai.com/v1/images/generations", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${process.env.OPENAI_API_KEY || ""}`
-          },
-          body: JSON.stringify({
-            prompt: prompt,
-            n: 1,
-            size: `${width}x${height}`,
-            model: "dall-e-3"
-          })
+      // Check if OpenAI API key is configured
+      if (!process.env.OPENAI_API_KEY) {
+        console.error("Missing OpenAI API key in environment variables");
+        return res.status(500).json({ 
+          success: false, 
+          message: "OpenAI API key is not configured. Please set the OPENAI_API_KEY environment variable." 
         });
-        
-        const data = await response.json();
-        imageUrl = data.data?.[0]?.url;
-      } else if (model === "stable-diffusion") {
-        // Call Stable Diffusion API
-        // Implementation depends on the specific API
-        imageUrl = "https://placeholder-for-stable-diffusion-generated-image.com/image.jpg";
       }
       
-      if (!imageUrl) {
-        return res.status(500).json({ message: "Failed to generate image" });
-      }
+      // Call our OpenAI service to generate the image
+      const imageUrl = await openai.generateImage({
+        prompt,
+        model,
+        width,
+        height
+      });
       
       // Store the generated image if userId is provided
       let savedImage = null;
@@ -140,9 +126,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         imageUrl,
         image: savedImage
       });
-    } catch (error) {
-      console.error("Text-to-image generation error:", error);
-      res.status(500).json({ message: "Failed to generate image" });
+    } catch (error: any) {
+      console.error("Text-to-image generation error:", error.message);
+      res.status(500).json({ 
+        success: false, 
+        message: `Failed to generate image: ${error.message}` 
+      });
     }
   });
 
