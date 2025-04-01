@@ -1,20 +1,14 @@
 {
-  "hosting": {
-    "public": "dist",
-    "site": "ai-image-crafting",
+	"hosting": {
+		"public": "dist",
+		"site": "ai-image-crafting",
 
-    
-    "ignore": [
-      "firebase.json",
-      "**/.*",
-      "**/node_modules/**"
-    ],
-    "rewrites": [
-      {
-        "source": "**",
-        "destination": "/index.html"
-      }
-    ]
-  }
-
+		"ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
+		"rewrites": [
+			{
+				"source": "**",
+				"destination": "/index.html"
+			}
+		]
+	}
 }
