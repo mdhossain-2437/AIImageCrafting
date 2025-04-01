@@ -33,12 +33,12 @@ export default function Header() {
       {/* Search Bar */}
       <div className="hidden md:flex items-center flex-1 mx-4 lg:mx-8">
         <div className="relative w-full max-w-lg group">
-          <div className="absolute inset-0 bg-gradient-to-r from-purple-500/20 to-blue-500/20 rounded-full blur-md opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+          <div className="absolute inset-0 bg-gradient-to-r from-purple-500/20 to-blue-500/20 rounded-lg blur-md opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
           <i className="ri-search-line absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 group-hover:text-purple-400 transition-colors duration-300 z-10"></i>
           <input 
             type="text" 
             placeholder="Search for prompts, styles, or models..." 
-            className="w-full bg-background/80 border border-purple-500/20 rounded-full py-2.5 pl-10 pr-4 text-sm focus:outline-none focus:animate-pulse-glow relative z-10 transition-all duration-300 hover:border-purple-500/40 focus:border-purple-500/60"
+            className="w-full pl-10 rounded-lg"
           />
           {/* Animated typing cursor */}
           <span className="absolute right-4 top-1/2 -translate-y-1/2 w-0.5 h-4 bg-purple-500/50 opacity-0 group-hover:opacity-100 animate-pulse z-10"></span>
@@ -47,15 +47,13 @@ export default function Header() {
 
       {/* User actions */}
       <div className="flex items-center space-x-4">
-        <button className="bg-background/80 backdrop-blur-lg p-2.5 rounded-lg text-gray-400 hover:text-white hover:bg-white/5 transition-all duration-300 relative group overflow-hidden">
-          <span className="absolute inset-0 bg-gradient-to-br from-purple-500/10 to-blue-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></span>
-          <i className="ri-notification-3-line group-hover:animate-pulse relative z-10"></i>
+        <button className="p-2.5 text-gray-400 relative">
+          <i className="ri-notification-3-line group-hover:animate-pulse"></i>
           <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-gradient-to-r from-purple-500 to-blue-500 rounded-full animate-pulse-glow"></span>
         </button>
         
-        <button className="bg-background/80 backdrop-blur-lg p-2.5 rounded-lg text-gray-400 hover:text-white transition-all duration-300 relative group overflow-hidden">
-          <span className="absolute inset-0 bg-gradient-to-br from-purple-500/10 to-blue-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></span>
-          <i className="ri-question-line relative z-10 group-hover:animate-float"></i>
+        <button className="p-2.5 text-gray-400 relative">
+          <i className="ri-question-line group-hover:animate-float"></i>
         </button>
         
         {isMobile && user && (
@@ -72,14 +70,13 @@ export default function Header() {
         )}
         
         {!user && (
-          <div className="relative group cursor-pointer" onClick={() => window.location.href = "/login"}>
-            <div className="absolute inset-0 bg-gradient-to-r from-purple-600 to-blue-600 rounded-md blur-md opacity-70 group-hover:opacity-100 transition-all duration-300 animate-pulse-glow"></div>
-            <div className="bg-gradient-to-r from-purple-500 to-blue-500 p-[2px] rounded-md overflow-hidden hover:p-[3px] transition-all duration-300 relative">
-              <div className="relative bg-background/90 text-white py-1.5 px-4 rounded-[3px] text-sm font-medium group-hover:bg-transparent transition-all duration-300">
-                Login
-              </div>
-            </div>
-          </div>
+          <button 
+            className="py-1.5 px-4 text-sm relative overflow-hidden border-purple-500/30 bg-transparent"
+            onClick={() => window.location.href = "/login"}
+          >
+            <span className="relative z-10">Login</span>
+            <div className="absolute inset-0 bg-gradient-to-r from-purple-500/20 to-blue-500/20 opacity-30 group-hover:opacity-100"></div>
+          </button>
         )}
       </div>
     </header>

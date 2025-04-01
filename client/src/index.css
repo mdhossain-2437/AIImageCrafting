@@ -120,6 +120,34 @@
   .button-glow:hover::after {
     @apply opacity-100;
   }
+  
+  /* Global form elements styling */
+  button, 
+  .button,
+  [type="button"],
+  [type="submit"] {
+    @apply bg-background/80 border border-purple-500/20 rounded-lg py-2 px-4 
+           text-sm focus:outline-none relative transition-all duration-300
+           focus:border-purple-500/60 focus:shadow-[0_0_15px_rgba(168,85,247,0.3)]
+           hover:border-purple-500/40;
+  }
+  
+  input:not([type="checkbox"]):not([type="radio"]),
+  textarea,
+  select {
+    @apply bg-background/80 border border-purple-500/20 rounded-lg py-2 px-4 
+           text-sm focus:outline-none 
+           focus:border-purple-500/60 focus:shadow-[0_0_15px_rgba(168,85,247,0.3)]
+           hover:border-purple-500/40 transition-all duration-300;
+  }
+  
+  /* For prompt boxes and text areas */
+  .prompt-box,
+  textarea {
+    @apply bg-background/80 border border-purple-500/20 rounded-lg
+           focus:border-purple-500/60 focus:shadow-[0_0_15px_rgba(168,85,247,0.3)]
+           hover:border-purple-500/40 transition-all duration-300;
+  }
 }
 
 /* Custom animations */
