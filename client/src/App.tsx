@@ -9,6 +9,7 @@ import ImageToImage from "@/pages/ImageToImage";
 import FaceCloning from "@/pages/FaceCloning";
 import FaceEditor from "@/pages/FaceEditor";
 import Gallery from "@/pages/Gallery";
+import ModelTuning from "@/pages/ModelTuning";
 import Login from "@/pages/Login";
 import MainLayout from "./components/ui/layout/MainLayout";
 
@@ -50,6 +51,12 @@ function Router() {
       <Route path="/gallery">
         <MainLayout>
           <Gallery />
+        </MainLayout>
+      </Route>
+      
+      <Route path="/model-tuning">
+        <MainLayout>
+          <ModelTuning />
         </MainLayout>
       </Route>
       

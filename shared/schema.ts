@@ -44,6 +44,18 @@ export const aiModels = pgTable("ai_models", {
   capabilities: jsonb("capabilities"),
 });
 
+// New table for model tunings
+export const modelTunings = pgTable("model_tunings", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  description: text("description"),
+  modelId: integer("model_id").references(() => aiModels.id),
+  userId: integer("user_id").references(() => users.id),
+  parameters: jsonb("parameters").notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
 // Insert schemas
 export const insertUserSchema = createInsertSchema(users).omit({
   id: true,
@@ -63,6 +75,12 @@ export const insertAiModelSchema = createInsertSchema(aiModels).omit({
   id: true,
 });
 
+export const insertModelTuningSchema = createInsertSchema(modelTunings).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
 // Types for insert and select
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
@@ -75,3 +93,6 @@ export type StylePreset = typeof stylePresets.$inferSelect;
 
 export type InsertAiModel = z.infer<typeof insertAiModelSchema>;
 export type AiModel = typeof aiModels.$inferSelect;
+
+export type InsertModelTuning = z.infer<typeof insertModelTuningSchema>;
+export type ModelTuning = typeof modelTunings.$inferSelect;

@@ -401,6 +401,113 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Model Tuning routes
+  app.get("/api/model-tunings", async (req: Request, res: Response) => {
+    try {
+      const userId = req.query.userId ? parseInt(req.query.userId as string) : undefined;
+      const tunings = await storage.getModelTunings(userId);
+      
+      // Enhance response with model names for easier display
+      const enhanced = await Promise.all(tunings.map(async (tuning) => {
+        const model = await storage.getAiModel(tuning.modelId);
+        return {
+          ...tuning,
+          modelName: model?.name || 'Unknown model'
+        };
+      }));
+      
+      res.status(200).json(enhanced);
+    } catch (error) {
+      console.error("Error fetching model tunings:", error);
+      res.status(500).json({ message: "Failed to fetch model tunings" });
+    }
+  });
+
+  app.get("/api/model-tunings/:id", async (req: Request, res: Response) => {
+    try {
+      const id = parseInt(req.params.id);
+      const tuning = await storage.getModelTuning(id);
+      
+      if (!tuning) {
+        return res.status(404).json({ message: "Model tuning not found" });
+      }
+      
+      // Enhance with model name
+      const model = await storage.getAiModel(tuning.modelId);
+      const enhanced = {
+        ...tuning,
+        modelName: model?.name || 'Unknown model'
+      };
+      
+      res.status(200).json(enhanced);
+    } catch (error) {
+      console.error("Error fetching model tuning:", error);
+      res.status(500).json({ message: "Failed to fetch model tuning" });
+    }
+  });
+
+  app.post("/api/model-tunings", async (req: Request, res: Response) => {
+    try {
+      // Parse and validate the request body
+      const { name, description, modelId, parameters, userId } = req.body;
+      
+      if (!name || !modelId || !parameters) {
+        return res.status(400).json({ 
+          message: "Required fields missing", 
+          required: ['name', 'modelId', 'parameters'] 
+        });
+      }
+      
+      // Create model tuning
+      const tuning = await storage.createModelTuning({
+        name,
+        description,
+        modelId: parseInt(modelId),
+        userId: userId ? parseInt(userId) : null,
+        parameters
+      });
+      
+      res.status(201).json(tuning);
+    } catch (error) {
+      console.error("Error creating model tuning:", error);
+      res.status(500).json({ message: "Failed to create model tuning" });
+    }
+  });
+
+  app.patch("/api/model-tunings/:id", async (req: Request, res: Response) => {
+    try {
+      const id = parseInt(req.params.id);
+      const tuning = await storage.getModelTuning(id);
+      
+      if (!tuning) {
+        return res.status(404).json({ message: "Model tuning not found" });
+      }
+      
+      // Update model tuning
+      const updated = await storage.updateModelTuning(id, req.body);
+      res.status(200).json(updated);
+    } catch (error) {
+      console.error("Error updating model tuning:", error);
+      res.status(500).json({ message: "Failed to update model tuning" });
+    }
+  });
+
+  app.delete("/api/model-tunings/:id", async (req: Request, res: Response) => {
+    try {
+      const id = parseInt(req.params.id);
+      const success = await storage.deleteModelTuning(id);
+      
+      if (!success) {
+        return res.status(404).json({ message: "Model tuning not found" });
+      }
+      
+      res.status(200).json({ success: true });
+    } catch (error) {
+      console.error("Error deleting model tuning:", error);
+      res.status(500).json({ message: "Failed to delete model tuning" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

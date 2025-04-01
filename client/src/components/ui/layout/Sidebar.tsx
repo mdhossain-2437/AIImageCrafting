@@ -140,6 +140,11 @@ export default function Sidebar() {
             <li>
               <NavLink href="/face-editor" icon="ri-edit-2-line text-lg">Face & Object Editor</NavLink>
             </li>
+            
+            <li className="text-xs font-semibold text-gray-400 px-4 py-2 mt-6 uppercase tracking-wider">Advanced</li>
+            <li>
+              <NavLink href="/model-tuning" icon="ri-settings-3-line text-lg">AI Model Tuning</NavLink>
+            </li>
           </ul>
         </nav>
 

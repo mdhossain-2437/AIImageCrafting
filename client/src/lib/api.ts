@@ -29,6 +29,26 @@ export interface ObjectEditingParams {
   userId?: number;
 }
 
+export interface ModelTuningParams {
+  name: string;
+  description?: string;
+  modelId: string;
+  parameters: {
+    temperature?: number;
+    topP?: number;
+    frequencyPenalty?: number;
+    presencePenalty?: number;
+    styleFidelity?: number;
+    detailEnhancement?: number;
+    creativityBoost?: number;
+    useFaceCorrection?: boolean;
+    useHighDefinition?: boolean;
+    maintainOriginalPalette?: boolean;
+    [key: string]: any;
+  };
+  userId?: number;
+}
+
 export interface GenerateImageResponse {
   success: boolean;
   imageUrl: string;
@@ -198,5 +218,58 @@ export async function editObjects(params: ObjectEditingParams): Promise<Generate
     throw new Error(errorText || response.statusText);
   }
   
+  return response.json();
+}
+
+// Model Tuning APIs
+
+// Get user's model tunings
+export async function getUserModelTunings(userId?: number) {
+  let url = '/api/model-tunings';
+  if (userId) {
+    url += `?userId=${userId}`;
+  }
+  
+  const response = await fetch(url, {
+    credentials: "include",
+  });
+  
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(errorText || response.statusText);
+  }
+  
+  return response.json();
+}
+
+// Save a model tuning
+export async function saveModelTuning(params: ModelTuningParams) {
+  const response = await apiRequest("POST", "/api/model-tunings", params);
+  return response.json();
+}
+
+// Get a specific model tuning
+export async function getModelTuning(id: number) {
+  const response = await fetch(`/api/model-tunings/${id}`, {
+    credentials: "include",
+  });
+  
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(errorText || response.statusText);
+  }
+  
+  return response.json();
+}
+
+// Update a model tuning
+export async function updateModelTuning(id: number, params: Partial<ModelTuningParams>) {
+  const response = await apiRequest("PATCH", `/api/model-tunings/${id}`, params);
+  return response.json();
+}
+
+// Delete a model tuning
+export async function deleteModelTuning(id: number) {
+  const response = await apiRequest("DELETE", `/api/model-tunings/${id}`);
   return response.json();
 }

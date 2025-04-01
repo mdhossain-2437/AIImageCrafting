@@ -2,7 +2,8 @@ import {
   User, InsertUser, 
   Image, InsertImage, 
   StylePreset, InsertStylePreset, 
-  AiModel, InsertAiModel 
+  AiModel, InsertAiModel,
+  ModelTuning, InsertModelTuning
 } from "@shared/schema";
 
 // Extend storage interface with all needed methods
@@ -26,6 +27,13 @@ export interface IStorage {
   getAiModel(id: number): Promise<AiModel | undefined>;
   getAiModels(): Promise<AiModel[]>;
   createAiModel(model: InsertAiModel): Promise<AiModel>;
+  
+  // Model tuning methods
+  getModelTuning(id: number): Promise<ModelTuning | undefined>;
+  getModelTunings(userId?: number): Promise<ModelTuning[]>;
+  createModelTuning(tuning: InsertModelTuning): Promise<ModelTuning>;
+  updateModelTuning(id: number, tuning: Partial<ModelTuning>): Promise<ModelTuning | undefined>;
+  deleteModelTuning(id: number): Promise<boolean>;
 }
 
 export class MemStorage implements IStorage {
@@ -33,22 +41,26 @@ export class MemStorage implements IStorage {
   private images: Map<number, Image>;
   private stylePresets: Map<number, StylePreset>;
   private aiModels: Map<number, AiModel>;
+  private modelTunings: Map<number, ModelTuning>;
   
   private currentUserId: number;
   private currentImageId: number;
   private currentPresetId: number;
   private currentModelId: number;
+  private currentTuningId: number;
 
   constructor() {
     this.users = new Map();
     this.images = new Map();
     this.stylePresets = new Map();
     this.aiModels = new Map();
+    this.modelTunings = new Map();
     
     this.currentUserId = 1;
     this.currentImageId = 1;
     this.currentPresetId = 1;
     this.currentModelId = 1;
+    this.currentTuningId = 1;
     
     // Initialize with default style presets
     this.initializeDefaultData();
@@ -225,6 +237,72 @@ export class MemStorage implements IStorage {
     const model: AiModel = { ...insertModel, id };
     this.aiModels.set(id, model);
     return model;
+  }
+  
+  // Model tuning methods
+  async getModelTuning(id: number): Promise<ModelTuning | undefined> {
+    return this.modelTunings.get(id);
+  }
+  
+  async getModelTunings(userId?: number): Promise<ModelTuning[]> {
+    let result = Array.from(this.modelTunings.values());
+    
+    if (userId) {
+      result = result.filter(tuning => tuning.userId === userId);
+    }
+    
+    // Sort by creation date, newest first
+    result.sort((a, b) => {
+      if (!a.createdAt || !b.createdAt) return 0;
+      return b.createdAt.getTime() - a.createdAt.getTime();
+    });
+    
+    return result;
+  }
+  
+  async createModelTuning(insertTuning: InsertModelTuning): Promise<ModelTuning> {
+    const id = this.currentTuningId++;
+    const createdAt = new Date();
+    const updatedAt = new Date();
+    
+    // Ensure userId is a number if provided
+    const userId = insertTuning.userId != null ? insertTuning.userId : null;
+    
+    // Create model tuning with created/updated timestamps
+    const tuning: ModelTuning = {
+      ...insertTuning,
+      id,
+      createdAt,
+      updatedAt,
+      userId: userId as number,
+      modelId: Number(insertTuning.modelId),
+      description: insertTuning.description || null
+    };
+    
+    this.modelTunings.set(id, tuning);
+    return tuning;
+  }
+  
+  async updateModelTuning(id: number, updateData: Partial<ModelTuning>): Promise<ModelTuning | undefined> {
+    const existing = this.modelTunings.get(id);
+    
+    if (!existing) {
+      return undefined;
+    }
+    
+    const updated: ModelTuning = {
+      ...existing,
+      ...updateData,
+      id, // Ensure id doesn't change
+      updatedAt: new Date() // Update timestamp
+    };
+    
+    this.modelTunings.set(id, updated);
+    return updated;
+  }
+  
+  async deleteModelTuning(id: number): Promise<boolean> {
+    return this.modelTunings.delete(id);
   }
 }
 
