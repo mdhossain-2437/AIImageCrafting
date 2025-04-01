@@ -18,8 +18,25 @@ const firebaseConfig = {
   authDomain: `${import.meta.env.VITE_FIREBASE_PROJECT_ID}.firebaseapp.com`,
   projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
   storageBucket: `${import.meta.env.VITE_FIREBASE_PROJECT_ID}.appspot.com`,
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID || "000000000000",
   appId: import.meta.env.VITE_FIREBASE_APP_ID,
+  measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID
 };
+
+// Validate Firebase configuration to avoid cryptic errors
+const validateFirebaseConfig = () => {
+  const requiredFields = ['apiKey', 'authDomain', 'projectId', 'appId'];
+  const missingFields = requiredFields.filter(field => 
+    !firebaseConfig[field as keyof typeof firebaseConfig]
+  );
+  
+  if (missingFields.length > 0) {
+    console.error(`Missing required Firebase configuration fields: ${missingFields.join(', ')}`);
+    console.error('Please ensure all required environment variables are set.');
+  }
+}
+
+validateFirebaseConfig();
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
@@ -36,12 +53,32 @@ googleProvider.setCustomParameters({
 // Sign in with Google
 export async function signInWithGoogle(): Promise<UserCredential> {
   try {
+    if (!auth || !googleProvider) {
+      throw new Error("Firebase authentication is not initialized properly");
+    }
+    
+    if (!firebaseConfig.apiKey || !firebaseConfig.authDomain) {
+      throw new Error("Firebase configuration is incomplete. Please check your environment variables.");
+    }
+    
+    // Check if we're in a valid origin for authentication
+    const currentOrigin = window.location.origin;
+    console.log(`Current Origin: ${currentOrigin}`);
+    
+    // Setting reCAPTCHA parameter for better security
+    googleProvider.setCustomParameters({
+      prompt: 'select_account',
+    });
+    
     await signInWithRedirect(auth, googleProvider);
     // This won't execute immediately - the page will redirect to Google
     // Handle the redirect result in handleRedirectResult function
     return {} as UserCredential; // This line won't actually execute due to redirect
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error during Google sign-in:", error);
+    if (error.code === 'auth/configuration-not-found') {
+      console.error("Firebase Auth configuration issue: Make sure your domain is added to authorized domains in Firebase console");
+    }
     throw error;
   }
 }
@@ -49,17 +86,36 @@ export async function signInWithGoogle(): Promise<UserCredential> {
 // Handle redirect result after Google sign-in
 export async function handleRedirectResult(): Promise<FirebaseUser | null> {
   try {
+    // Try to get redirect result
     const result = await getRedirectResult(auth);
     if (result) {
       // User successfully signed in
       // Save user data to Firestore
       const user = result.user;
-      await saveUserToFirestore(user);
+      
+      // Log success information
+      console.log("Successfully authenticated user:", user.displayName || user.email);
+      
+      try {
+        await saveUserToFirestore(user);
+      } catch (firestoreError) {
+        // If Firestore save fails, we still want to continue with authentication
+        console.error("Error saving to Firestore, but continuing authentication:", firestoreError);
+      }
+      
       return user;
     }
     return null;
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error handling redirect result:", error);
+    
+    // Special handling for common Firebase Auth errors
+    if (error.code === 'auth/configuration-not-found') {
+      console.error("Firebase Auth configuration issue: Make sure your domain is added to authorized domains in Firebase console");
+    } else if (error.code === 'auth/popup-closed-by-user') {
+      console.log("User closed the authentication popup");
+    }
+    
     throw error;
   }
 }

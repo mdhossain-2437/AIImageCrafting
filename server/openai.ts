@@ -97,6 +97,18 @@ export async function generateImage(request: TextToImageRequest): Promise<string
       throw new Error("OpenAI API key is not configured");
     }
 
+    // Validate prompt
+    if (!request.prompt || request.prompt.trim().length === 0) {
+      throw new Error("Prompt is required for image generation");
+    }
+    
+    // Sanitize and enhance the prompt if too short
+    let enhancedPrompt = request.prompt.trim();
+    if (enhancedPrompt.length < 10) {
+      log("Prompt is very short, adding context to improve results", "openai");
+      enhancedPrompt += ", detailed high quality image";
+    }
+
     // Use DALL-E 3 by default
     const model = request.model || "dall-e-3";
     // DALL-E 3 supports 1024x1024, 1024x1792, 1792x1024 sizes
@@ -114,17 +126,26 @@ export async function generateImage(request: TextToImageRequest): Promise<string
     }
 
     // Log the request
-    log(`Generating image with prompt: ${request.prompt}`, "openai");
+    log(`Generating image with prompt: ${enhancedPrompt}`, "openai");
     
-    const response = await openai.images.generate({
+    // Set a timeout to prevent hanging requests
+    const timeoutPromise = new Promise<never>((_, reject) => {
+      setTimeout(() => reject(new Error("OpenAI request timed out after 30 seconds")), 30000);
+    });
+    
+    // Make the actual request
+    const apiPromise = openai.images.generate({
       model: model,
-      prompt: request.prompt,
+      prompt: enhancedPrompt,
       n: 1,
       size: size as any, // Cast to any to handle the size parameter
       quality: "standard", // Use "hd" for higher quality (costs more)
     });
+    
+    // Race the timeout against the actual request
+    const response = await Promise.race([apiPromise, timeoutPromise]) as OpenAI.Images.ImagesResponse;
 
-    if (!response.data[0].url) {
+    if (!response.data || !response.data[0] || !response.data[0].url) {
       throw new Error("No image URL in response");
     }
 
@@ -132,6 +153,25 @@ export async function generateImage(request: TextToImageRequest): Promise<string
     return response.data[0].url;
   } catch (error: any) {
     log(`Image generation error: ${error.message}`, "openai");
+    
+    // Parse OpenAI error messages to provide more user-friendly responses
+    if (error.response && error.response.data) {
+      const openaiError = error.response.data.error;
+      if (openaiError) {
+        if (openaiError.code === 'content_policy_violation') {
+          throw new Error("Your prompt violates content policy. Please avoid requests for harmful, illegal, or unethical content.");
+        } else if (openaiError.code === 'rate_limit_exceeded') {
+          throw new Error("Rate limit exceeded. Please try again later.");
+        }
+      }
+    }
+    
+    // Handle authentication errors
+    if (error.message.includes('auth') || error.message.includes('key')) {
+      throw new Error("Authentication with OpenAI failed. Please check your API key.");
+    }
+    
+    // Generic error fallback
     throw new Error(`Failed to generate image: ${error.message}`);
   }
 }

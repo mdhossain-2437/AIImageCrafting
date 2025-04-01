@@ -100,19 +100,42 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return () => unsubscribe();
   }, [toast]);
 
-  // Login with username and password (NOT IMPLEMENTED WITH FIREBASE)
-  // This is kept for compatibility but redirects to Google sign-in
+  // Login with username and password
   const login = async (username: string, password: string): Promise<User> => {
     try {
       setLoading(true);
       setError(null);
       
-      // For this application, we'll only use Google sign-in
-      // Redirect to Google sign-in instead
-      await firebaseSignInWithGoogle();
+      // Call the login API endpoint
+      const response = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ username, password }),
+      });
       
-      // This won't actually execute due to the redirect
-      throw new Error("This should not execute - redirect should happen");
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Login failed');
+      }
+      
+      const userData = await response.json();
+      
+      // Create a user object from the response
+      const loggedInUser: User = {
+        id: userData.id,
+        username: userData.username,
+        password: '', // We don't store the actual password
+        email: userData.email || `${username}@example.com`, // Fallback for users created without email
+        displayName: userData.displayName || username,
+        avatar: userData.avatar || null,
+        createdAt: userData.createdAt ? new Date(userData.createdAt) : new Date(),
+      };
+      
+      setUser(loggedInUser);
+      
+      return loggedInUser;
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : "Login failed";
       setError(errorMessage);
@@ -127,19 +150,47 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  // Register new user (NOT IMPLEMENTED WITH FIREBASE)
-  // This is kept for compatibility but redirects to Google sign-in
+  // Register new user
   const register = async (userData: any): Promise<User> => {
     try {
       setLoading(true);
       setError(null);
       
-      // For this application, we'll only use Google sign-in
-      // Redirect to Google sign-in instead
-      await firebaseSignInWithGoogle();
+      // Call the register API endpoint
+      const response = await fetch('/api/auth/register', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          username: userData.username,
+          password: userData.password,
+          email: userData.email,
+          displayName: userData.displayName || userData.username,
+        }),
+      });
       
-      // This won't actually execute due to the redirect
-      throw new Error("This should not execute - redirect should happen");
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Registration failed');
+      }
+      
+      const registeredUserData = await response.json();
+      
+      // Create a user object from the response
+      const registeredUser: User = {
+        id: registeredUserData.id,
+        username: registeredUserData.username,
+        password: '', // We don't store the actual password
+        email: registeredUserData.email,
+        displayName: registeredUserData.displayName || registeredUserData.username,
+        avatar: registeredUserData.avatar || null,
+        createdAt: registeredUserData.createdAt ? new Date(registeredUserData.createdAt) : new Date(),
+      };
+      
+      setUser(registeredUser);
+      
+      return registeredUser;
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : "Registration failed";
       setError(errorMessage);
